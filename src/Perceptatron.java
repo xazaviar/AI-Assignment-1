@@ -3,6 +3,9 @@ import java.util.ArrayList;
 /**
  * The individual "neuron" in the neural network
  * @author Joseph Ryan
+ * @class: Class CS4811
+ * @date: 1/19/2017
+ * @assignment: Artificial Neural Networks
  */
 public class Perceptatron {
     public ArrayList<Connection> inputs = new ArrayList<>();    //The connections receiving inputs from

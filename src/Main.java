@@ -1,12 +1,22 @@
 
 /**
- *
+ * This program sets up a neural network and 
+ * then trains the network to process and learn 
+ * the given function
  * @author Joseph Ryan
+ * @class: Class CS4811
+ * @date: 1/19/2017
+ * @assignment: Artificial Neural Networks
  */
 public class Main {
     
     static Perceptatron[] network;
     
+    /**
+     * Runs the program
+     * @param args 
+     *          The training file and the number of nodes to produce
+     */
     public static void main (String[] args){
         
         int n = 3;
@@ -36,6 +46,7 @@ public class Main {
             }
         }
         
+        //Output the network
         for(Perceptatron p: network){
             System.out.println(p.name());
             System.out.println(p.inputConnections());
