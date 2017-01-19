@@ -19,6 +19,8 @@ public class Perceptatron {
     }
     
     public String name(){
+        if(this.layer==0)
+            return "input"+this.node;
         return "L"+this.layer+"N"+this.node;
     }
     
@@ -32,7 +34,7 @@ public class Perceptatron {
     
     public String outputConnections(){
         String ret = "";
-        for(Connection c: inputs){
+        for(Connection c: outputs){
             ret += "\t OUT: "+c.dest.name()+" ["+c.weight+"]\n";
         }
         return ret;

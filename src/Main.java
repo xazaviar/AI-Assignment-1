@@ -27,9 +27,8 @@ public class Main {
         }
         
         //Make Connections
-        for(int i = 0; i < network.length-1; i++){ 
-            
-            for(int l = i+1; l < network.length; i++){
+        for(int i = 0; i < network.length-1; i++){   
+            for(int l = i+1; l < network.length; l++){
                 if(network[i].layer+1==network[l].layer)
                     new Connection(network[i],network[l]);
                 else if(network[i].layer+2==network[l].layer)
