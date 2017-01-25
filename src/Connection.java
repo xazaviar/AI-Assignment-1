@@ -1,3 +1,6 @@
+
+import java.math.BigDecimal;
+
 /**
  * This represents a single connection between two perceptatrons
  * @author Joseph Ryan
@@ -21,9 +24,13 @@ public class Connection {
     public Connection(Perceptatron src, Perceptatron dest){
         this.src = src;
         this.dest = dest;
-        this.weight = Math.random();
         
-        this.src.outputs.add(this);
-        this.dest.inputs.add(this);
+        double r = Math.random();
+        this.weight = (r==0?.01:r);
+        
+        if(src!=null){
+            this.src.outputs.add(this);
+            this.dest.inputs.add(this);
+        }
     }
 }
