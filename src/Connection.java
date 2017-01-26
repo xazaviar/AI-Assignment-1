@@ -25,7 +25,7 @@ public class Connection {
         this.src = src;
         this.dest = dest;
         
-        double r = Math.random();
+        double r = Math.random() * 2 - 1;
         this.weight = (r==0?.01:r);
         
         if(src!=null){

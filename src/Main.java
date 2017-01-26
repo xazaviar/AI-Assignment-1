@@ -152,13 +152,13 @@ public class Main {
      *          The constant to adjust the weights by
      */
     public static void trainNetwork(Perceptatron[] network, int[][] training, double constant){
-        int sastify = training.length;
-        int correct = 0;
+        int correct = 0, count = 0;
         
-        int max = 100, count = 0;
+        int report = -1;
         
         //loop until all training outputs are correct
         do{
+            count++;
             //For each training example
             for(int i = 0; i < training.length; i++){
                 //Set initial input nodes
@@ -167,30 +167,77 @@ public class Main {
                 
                 //Feed all values forward
                 for(int n = 2; n < network.length; n++){
-                    network[n].activate();
+                    network[n].activation();
                 }
                 
                 //Check output and calc error
                 double act = network[network.length-1].activation;
-                double error = act * (1-act) * (training[i][2]-act);
+                network[network.length-1].deltaValue = act * (1-act) * (training[i][2]-act);
+                
+                if(i==report || report == -2)
+                    System.out.println("Network output -> "+act+" | error = "+network[network.length-1].deltaValue+"\n");
                 
                 //Propagate the delta backward from output layer to input layer
                 for(int n = network.length-1; n > 1; n--){
-                    network[n].blame(error);
+                    if(network[n].layer==1)
+                        break;
+                    network[n].blame();
                 }
                 
                 //Update every weight in the network
                 for(int n = network.length-1; n > 1; n--){
-                    network[n].updateWeights(error, constant);
+                    network[n].updateWeights(constant);
+                    if(i==report || report == -2){
+                        System.out.println(network[n].name()+network[n].info());
+                        System.out.print(network[n].inputConnections());
+                    }
                 }
-                
-                //Clean up nodal activations
-                for(Perceptatron p: network)
-                    p.activation = 0;
             }
-            count++;
-        } while (correct < sastify && count < max);
+            
+            correct = testExamples(count,network,training);
+        } while (correct < training.length && count < 100000);
         
+    }
+    
+    /**
+     * Test the current network with the training tests
+     * @param iter
+     *          The current network iteration
+     * @param network
+     *          The network to test
+     * @param training
+     *          The training cases to test against
+     * @return 
+     *          The number of tests that are correct
+     */
+    public static int testExamples(int iter, Perceptatron[] network, int[][] training){
+        int correct = 0;
+        
+        System.out.println("\n---------------------------------------------------");
+        System.out.println("Iteration: "+iter);
+        System.out.println("---------------------------------------------------");
+        
+        for(int t = 0; t < training.length; t++){
+            System.out.println("Test "+t+" | x1 = "+training[t][0]+", x2 = "+training[t][0]+", out = "+training[t][2]);
+            //Set initial input nodes
+            network[0].activation = training[t][0];
+            network[1].activation = training[t][1];
+
+            //Feed all values forward
+            for(int n = 2; n < network.length; n++){
+                network[n].threshold();
+            }
+
+            //Check output
+            System.out.println("\toutput: "+(int)network[network.length-1].activation+" | expected: "+training[t][2]+"\n");
+            correct += ((int)network[network.length-1].activation==training[t][2]?1:0);
+
+            //Clean up nodal activations
+            for(Perceptatron p: network)
+                p.activation = 0;
+        }
+        
+        return correct;
     }
     
     /**
@@ -210,14 +257,14 @@ public class Main {
                 
                 //Feed all values forward
                 for(int n = 2; n < network.length; n++){
-                    network[n].activate();
+                    network[n].threshold();
                 }
                 
                 //Check output
                 //Make the weight have only 2 decimal places
                 BigDecimal bd = new BigDecimal(network[network.length-1].activation);
                 bd = bd.setScale(2, BigDecimal.ROUND_HALF_UP);
-                System.out.print(""+bd.doubleValue()+"  ");
+                System.out.print(""+(int)network[network.length-1].activation+"  ");
                 
                 //Clean up nodal activations
                 for(Perceptatron p: network)

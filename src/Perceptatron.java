@@ -13,7 +13,7 @@ public class Perceptatron {
     public ArrayList<Connection> outputs = new ArrayList<>();   //The connections to output the signal too
     
     public double activation = 0;                               //This denotes if the node has activated
-    public double outputValue = 0;                              //This denotes the d value of this node
+    public double deltaValue = 0;                               //This denotes the d value of this node
     
     //Reporting Variables
     public int layer, node;                                     //These variables are for marking each node
@@ -39,7 +39,20 @@ public class Perceptatron {
     /**
      * This function calculates the activation of the neuron
      */
-    public void activate(){
+    public void activation(){
+        double sum = 0;
+        
+        for(Connection in: inputs){
+            if(in.src==null)
+                sum+=in.weight;
+            else
+                sum+=in.src.activation*in.weight;
+        }
+        
+        this.activation = sigmoid(sum);
+    }
+    
+    public void threshold(){
         double sum = 0;
         
         for(Connection in: inputs){
@@ -49,7 +62,7 @@ public class Perceptatron {
                 sum+=in.src.activation*in.weight;
         }
 
-        this.activation = sigmoid(sum);
+        this.activation = (sum>0?1:0);
     }
     
     /**
@@ -57,11 +70,10 @@ public class Perceptatron {
      * @param error 
      *          The amount to blame
      */
-    public void blame(double error){
-        for(Connection in: inputs){
+    public void blame(){
+        for(Connection in: inputs)
             if(in.src!=null)
-                in.src.outputValue = in.src.activation * (1 - in.src.activation) * in.weight * error; 
-        }
+                in.src.deltaValue = in.src.activation * (1 - in.src.activation) * in.weight * this.deltaValue; 
     }
     
     /**
@@ -71,9 +83,9 @@ public class Perceptatron {
      * @param constant 
      *          The amount to change a weight
      */
-    public void updateWeights(double error, double constant){
+    public void updateWeights(double constant){
         for(Connection in: inputs){
-            in.weight += constant * (in.src==null?1:in.src.activation) * error;
+            in.weight += constant * (in.src==null?1:in.src.activation) * this.deltaValue;
         }
     }
     
@@ -89,6 +101,14 @@ public class Perceptatron {
         else if(this.outputNode)
             return "output";
         return "L"+this.layer+"N"+this.node;
+    }
+    public String info(){
+        //Make the weight have only 2 decimal places
+        BigDecimal bd1 = new BigDecimal(this.activation);
+        BigDecimal bd2 = new BigDecimal(this.deltaValue);
+        bd1 = bd1.setScale(2, BigDecimal.ROUND_HALF_UP);
+        bd2 = bd2.setScale(2, BigDecimal.ROUND_HALF_UP);
+        return "\tact: "+bd1+" | d: "+bd2;
     }
     public String inputConnections(){
         String ret = "";
