@@ -30,7 +30,7 @@ public class Main {
         
         int[][] training = readTrainingFile(args[2]);
         double constant = Double.parseDouble(args[1]);
-        Perceptatron[] network = makeNetwork(Integer.parseInt(args[0])); //Create the network
+        Perceptatron[] network = makeNetwork2(Integer.parseInt(args[0])); //Create the network
         
         //Output the network
         System.out.println("---------------------------------------------------");
@@ -142,6 +142,40 @@ public class Main {
     }
     
     /**
+     * This function creates the network with a single 
+     * hidden layer of n nodes
+     * @param n
+     *          The number of nodes in the hidden layer
+     * @return 
+     *          a feed forward neural network
+     */
+    public static Perceptatron[] makeNetwork2(int n){
+        Perceptatron[] network = new Perceptatron[3+n];
+        
+        //Create all of the perceptatrons
+        network[0] = new Perceptatron(0,0,false);
+        network[1] = new Perceptatron(0,1,false);
+        int layer = 1, node = 0;
+        for(int i = 2; i < network.length-1; i++, node++){
+            network[i] = new Perceptatron(layer,node,true);
+        }
+        network[network.length-1] = new Perceptatron(2,0,true);
+        network[network.length-1].outputNode = true; //For naming conventions
+        
+        //Make Connections
+        for(int i = 0; i < network.length-1; i++){   
+            for(int l = i+1; l < network.length; l++){
+                if(network[i].layer+1==network[l].layer)
+                    new Connection(network[i],network[l]);
+                else if(network[i].layer+2==network[l].layer)
+                    break;
+            }
+        }
+        
+        return network;
+    }
+    
+    /**
      * This function trains the neural network using the given training,
      * network, and constant adjust value
      * @param network
@@ -195,7 +229,7 @@ public class Main {
             }
             
             correct = testExamples(count,network,training);
-        } while (correct < training.length && count < 100000);
+        } while (correct < training.length && count < 10000000);
         
     }
     
@@ -216,9 +250,9 @@ public class Main {
         System.out.println("\n---------------------------------------------------");
         System.out.println("Iteration: "+iter);
         System.out.println("---------------------------------------------------");
+        System.out.println("INCORRECT TESTS: \n");
         
         for(int t = 0; t < training.length; t++){
-            System.out.println("Test "+t+" | x1 = "+training[t][0]+", x2 = "+training[t][0]+", out = "+training[t][2]);
             //Set initial input nodes
             network[0].activation = training[t][0];
             network[1].activation = training[t][1];
@@ -229,13 +263,18 @@ public class Main {
             }
 
             //Check output
-            System.out.println("\toutput: "+(int)network[network.length-1].activation+" | expected: "+training[t][2]+"\n");
+            if(((int)network[network.length-1].activation)!=training[t][2]){
+//                System.out.println("Test "+t+" | x1 = "+training[t][0]+", x2 = "+training[t][1]+", out = "+training[t][2]);
+//                System.out.println("\toutput: "+(int)network[network.length-1].activation+" | expected: "+training[t][2]+"\n");
+            }
             correct += ((int)network[network.length-1].activation==training[t][2]?1:0);
 
             //Clean up nodal activations
             for(Perceptatron p: network)
                 p.activation = 0;
         }
+        
+        System.out.println("Tests Passed: "+correct+"/"+training.length);
         
         return correct;
     }
@@ -247,7 +286,7 @@ public class Main {
      *          The network to test
      */
     public static void testNetwork(Perceptatron[] network){
-        double xMax = 1, yMax = 1, inc = .1;
+        double xMax = 50, yMax = 50, inc = 1;
         
         for(double y = yMax; y >= 0; y-=inc){
             for(double x = 0; x <= xMax; x+=inc){
